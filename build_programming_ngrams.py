@@ -155,8 +155,14 @@ def save_ngrams(ngrams: Dict[str, float], path: Path, n: int):
     sorted_ngrams = sorted(ngrams.items(), key=lambda x: x[1], reverse=True)
     with open(path, "w", encoding="utf-8") as f:
         for gram, freq in sorted_ngrams:
-            # escape control characters but keep unicode and space as-is
-            display = gram.replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t")
+            # Match Rust's process_special_characters_inverse EXACTLY
+            # Only escape backslash and newline. Leave \t and \r literal.
+            display = (
+                gram
+                .replace("\\", "\\\\")
+                .replace("\n", "\\n")
+                # NO .replace for \r or \t
+            )
             f.write(f"{freq:.10f} {display}\n")
 
 
